@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<body id="burn" style="width:100%; height:100%; background-color:#fff;">
+	<div id="controls">
+		<div>
+			<label>Timer (ms) : </label>
+			<input type="text" value="250" id="timer" />
+		</div>
+		<div>
+			<label>Run for : </label>
+			<input type="text" value="1" id="run_for" />
+			<select id="for_unit">
+				<option value="second">second(s)</option>
+				<option value="minute">minute(s)</option>
+				<option value="hour">hour(s)</option>
+			</select>
+		</div>
+		<div>
+			<input type="button" value="Run !" onclick="burned_in_killer.config(true);" />
+		</div>
+	</div>
+</body>
+<footer>
+	<script type="text/javascript">
+var burned_in_killer = 
+{
+	timer : 250,
+	timeout : null,
+	color : Array('red', 'blue', 'yellow', 'green', 'white', 'grey', 'purple'),
+	current : 0,
+	runned : 0,
+	run_for : 20,
+
+	config : function(run) {
+		this.timer=document.getElementById('timer').value;
+
+		var mult=1;
+		switch(document.getElementById('for_unit').value) {
+			case 'second' :
+				break;
+			case 'minute' :
+				mult=mult*60;
+				break;
+			case 'hour' :
+				mult=mult*60*60;
+				break;
+		}
+
+		mult*=1000;
+
+		this.run_for=(parseFloat(document.getElementById('run_for').value)*mult)/this.timer;
+
+		if (run) {
+			document.getElementById('controls').style="display:none;"
+		    
+		    if(document.documentElement.requestFullScreen) {
+		      document.documentElement.requestFullScreen();
+		    } 
+		    else if(document.documentElement.mozRequestFullScreen) {
+		      document.documentElement.mozRequestFullScreen();
+		    } 
+		    else if(document.documentElement.webkitRequestFullScreen) {
+		      document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+		    }
+
+			this.run();
+		}
+	},
+	
+	run : function () {
+		document.getElementById('burn').setAttribute('style','height:100%, width:100%; background-color:'+this.color[this.current]);
+		this.current++;
+		this.runned++;
+		if (this.current==this.color.length)
+		{
+			this.current=0;
+		}
+		if (this.runned<this.run_for) {
+			this.timeout = setTimeout('burned_in_killer.run()',this.timer);
+		}
+		else {
+			if(document.cancelFullScreen) {
+		      document.cancelFullScreen();
+		    } 
+		    else if(document.mozCancelFullScreen) {
+		      document.mozCancelFullScreen();
+		    } 
+		    else if(document.webkitCancelFullScreen) {
+		      document.webkitCancelFullScreen();
+		    }
+			this.runned=0;
+			document.getElementById('burn').setAttribute('style','height:100%, width:100%; background-color:white');
+			document.getElementById('controls').style="display:block;"
+		}
+		
+	},
+
+	stop : function () {
+		clearTimeout(this.timeout)
+	}
+}
+
+	</script>
+</footer>
+</html>
