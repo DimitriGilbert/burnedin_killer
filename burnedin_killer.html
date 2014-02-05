@@ -1,105 +1,136 @@
 <!DOCTYPE html>
-<html>
-<body id="burn" style="width:100%; height:100%; background-color:#fff;">
-	<div id="controls">
-		<div>
-			<label>Timer (ms) : </label>
-			<input type="text" value="250" id="timer" />
-		</div>
-		<div>
-			<label>Run for : </label>
-			<input type="text" value="1" id="run_for" />
-			<select id="for_unit">
-				<option value="second">second(s)</option>
-				<option value="minute">minute(s)</option>
-				<option value="hour">hour(s)</option>
-			</select>
-		</div>
-		<div>
-			<input type="button" value="Run !" onclick="burned_in_killer.config(true);" />
-		</div>
-	</div>
-</body>
-<footer>
-	<script type="text/javascript">
-var burned_in_killer = 
-{
-	timer : 250,
-	timeout : null,
-	color : Array('red', 'blue', 'yellow', 'green', 'white', 'grey', 'purple'),
-	current : 0,
-	runned : 0,
-	run_for : 20,
+<html lang="fr">
+    <head>
+        <title>Burnedin Killer</title>
+    </head>
+    <body id="burn" style="width:100%; height:100%; background-color:#fff;">
+        <div id="controls">
+            <div>
+                <label>Timer (ms) : </label>
+                <input type="text" value="250" id="timer" />
+            </div>
+            <div>
+                <label>Run for : </label>
+                <input type="text" value="1" id="run_for" />
+                <select id="for_unit">
+                    <option value="second">second(s)</option>
+                    <option value="minute">minute(s)</option>
+                    <option value="hour">hour(s)</option>
+                </select>
+            </div>
+            <div>
+                <input type="button" value="Run !" onclick="burned_in_killer.launch();" />
+            </div>
+        </div>
+        <script type="text/javascript">
+            var burned_in_killer =
+                    {
+                        options: {
+                            duration: null,
+                            colors: ['red', 'blue', 'yellow', 'green', 'white', 'grey', 'purple'],
+                            color_index: null,
+                            time_unit: null,
+                            total_time: 1,
+                            rounds: 0,
+                            runned: 0,
+                            bodyburn_default_style: 'height:100%, width:100%; background-color:',
+                            fullscreen_enabled: false,
+                            killer_started: false,
+                            initialized: false
+                        },
+                        elements: {
+                            bodyburn: null,
+                            controls: null,
+                            input_timer: null,
+                            input_runfor: null,
+                            input_unit: null
+                        },
+                        initialize: function() {
+                            this.options.runned = 0;
+                            if (true === this.options.initialized) {
+                                return;
+                            }
+                            this.elements.bodyburn = document.getElementById('burn');
+                            this.elements.controls = document.getElementById('controls');
+                            this.elements.input_timer = document.getElementById('timer');
+                            this.elements.input_runfor = document.getElementById('run_for');
+                            this.elements.input_unit = document.getElementById('for_unit');
+                            this.options.initialized = true;
+                        },
+                        config: function() {
+                            this.options.duration = this.elements.input_timer.value;
 
-	config : function(run) {
-		this.timer=document.getElementById('timer').value;
+                            switch (this.elements.input_unit.value) {
+                                case 'second' :
+                                    break;
+                                case 'minute' :
+                                    this.options.total_time *= 60;
+                                    break;
+                                case 'hour' :
+                                    this.options.total_time *= (60 * 60);
+                                    break;
+                            }
 
-		var mult=1;
-		switch(document.getElementById('for_unit').value) {
-			case 'second' :
-				break;
-			case 'minute' :
-				mult=mult*60;
-				break;
-			case 'hour' :
-				mult=mult*60*60;
-				break;
-		}
+                            this.options.rounds = (parseFloat(this.elements.input_runfor.value) * (this.options.total_time * 1000)) / this.options.duration;
+                            this.fullscreen(true);
+                            this.options.killer_started = true;
+                        },
+                        run: function() {
+                            this.elements.bodyburn.setAttribute('style', this.options.bodyburn_default_style + this.getNextColor());
+                            
+                            if (++this.options.runned < this.options.rounds) {
+                                setTimeout('burned_in_killer.run()', this.options.duration);
+                            } else {
+                                this.fullscreen(false);
+                                this.elements.bodyburn.setAttribute('style', this.options.bodyburn_default_style + 'white');
+                                this.elements.controls.style = "display:block;";
+                                this.options.killer_started = false;
+                            }
+                        },
+                        launch: function() {
+                            this.initialize();
+                            this.config();
+                            this.elements.controls.style = "display:none;";
+                            this.run();
+                        },
+                        getNextColor: function() {
+                            if (++this.options.color_index == this.options.colors.length) {
+                                this.options.color_index = 0;
+                            }
+                            return this.options.colors[this.options.color_index];
+                        },
+                        fullscreen: function(state) {
+                            if(false === this.options.fullscreen_enabled){
+                                return;
+                            }
+                            switch (state) {
+                                case true:
+                                    if (document.documentElement.requestFullScreen) {
+                                        document.documentElement.requestFullScreen();
+                                    }
+                                    else if (document.documentElement.mozRequestFullScreen) {
+                                        document.documentElement.mozRequestFullScreen();
+                                    }
+                                    else if (document.documentElement.webkitRequestFullScreen) {
+                                        document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+                                    }
+                                    break;
+                                case false:
+                                    if (document.cancelFullScreen) {
+                                        document.cancelFullScreen();
+                                    }
+                                    else if (document.mozCancelFullScreen) {
+                                        document.mozCancelFullScreen();
+                                    }
+                                    else if (document.webkitCancelFullScreen) {
+                                        document.webkitCancelFullScreen();
+                                    }
+                                    break;
+                            }
+                        }
+                    }
 
-		mult*=1000;
+        </script>    
+    </body>
 
-		this.run_for=(parseFloat(document.getElementById('run_for').value)*mult)/this.timer;
-
-		if (run) {
-			document.getElementById('controls').style="display:none;"
-		    
-		    if(document.documentElement.requestFullScreen) {
-		      document.documentElement.requestFullScreen();
-		    } 
-		    else if(document.documentElement.mozRequestFullScreen) {
-		      document.documentElement.mozRequestFullScreen();
-		    } 
-		    else if(document.documentElement.webkitRequestFullScreen) {
-		      document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-		    }
-
-			this.run();
-		}
-	},
-	
-	run : function () {
-		document.getElementById('burn').setAttribute('style','height:100%, width:100%; background-color:'+this.color[this.current]);
-		this.current++;
-		this.runned++;
-		if (this.current==this.color.length)
-		{
-			this.current=0;
-		}
-		if (this.runned<this.run_for) {
-			this.timeout = setTimeout('burned_in_killer.run()',this.timer);
-		}
-		else {
-			if(document.cancelFullScreen) {
-		      document.cancelFullScreen();
-		    } 
-		    else if(document.mozCancelFullScreen) {
-		      document.mozCancelFullScreen();
-		    } 
-		    else if(document.webkitCancelFullScreen) {
-		      document.webkitCancelFullScreen();
-		    }
-			this.runned=0;
-			document.getElementById('burn').setAttribute('style','height:100%, width:100%; background-color:white');
-			document.getElementById('controls').style="display:block;"
-		}
-		
-	},
-
-	stop : function () {
-		clearTimeout(this.timeout)
-	}
-}
-
-	</script>
-</footer>
 </html>
